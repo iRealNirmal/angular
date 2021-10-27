@@ -311,7 +311,6 @@ export class StackblitzBuilder {
       '!**/e2e/**/*.*',
       '!**/package.json',
       '!**/example-config.json',
-      '!**/tslint.json',
       '!**/.editorconfig',
       '!**/wallaby.js',
       '!**/karma-test-shim.js',

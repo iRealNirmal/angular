@@ -25,7 +25,16 @@ const CLI_SPEC_FILENAME = 'e2e/src/app.e2e-spec.ts';
 const EXAMPLE_CONFIG_FILENAME = 'example-config.json';
 const DEFAULT_CLI_EXAMPLE_PORT = 4200;
 const DEFAULT_CLI_SPECS_CONCURRENCY = 1;
-const IGNORED_EXAMPLES = [];
+const MAX_NO_OUTPUT_TIMEOUT = 1000 * 60 * 5;  // 5 minutes
+const IGNORED_EXAMPLES = [
+  // All of these `@angular/upgrade` related examples are relying on the SystemJS boilerplate.
+  // As of v13, Angular packages no longer include UMD bundles so these examples are no longer
+  // working. We temporarily disable them until we migrate them to actual CLI apps (if possible).
+  // TODO: re-enable examples once they can run with APF v13 package output.
+  "upgrade-module",
+  "upgrade-phonecat-2-hybrid",
+  "upgrade-phonecat-3-final",
+];
 
 /**
  * Run Protractor End-to-End Tests for Doc Samples
@@ -266,7 +275,7 @@ function runE2eTestsCLI(appDir, outputFile, bufferOutput, port) {
                          cmd: 'yarn',
                          args: [
                            'e2e',
-                           '--prod',
+                           '--configuration=production',
                            '--protractor-config=e2e/protractor-puppeteer.conf.js',
                            '--no-webdriver-update',
                            '--port={PORT}',
@@ -311,11 +320,10 @@ function runE2eTestsCLI(appDir, outputFile, bufferOutput, port) {
 function reportStatus(status, outputFile) {
   let log = [''];
 
-  log.push('Suites ignored due to legacy guides:');
-  IGNORED_EXAMPLES.filter(example => !fixmeIvyExamples.find(ex => ex.startsWith(example)))
-      .forEach(function(val) {
-        log.push('  ' + val);
-      });
+  log.push('Suites ignored:');
+  IGNORED_EXAMPLES.forEach(function(val) {
+    log.push('  ' + val);
+  });
 
   log.push('');
   log.push('Suites passed:');
@@ -339,18 +347,35 @@ function reportStatus(status, outputFile) {
 
 // Returns both a promise and the spawned process so that it can be killed if needed.
 function spawnExt(
-    command, args, options, ignoreClose = false, printMessage = msg => process.stdout.write(msg)) {
-  let proc;
-  const promise = new Promise((resolve, reject) => {
+    command, args, options, ignoreClose = false, printMessageFn = msg => process.stdout.write(msg)) {
+  let proc = null;
+  const promise = new Promise((resolveFn, rejectFn) => {
+    let noOutputTimeoutId;
+    const failDueToNoOutput = () => {
+      treeKill(proc.id);
+      reject(`No output after ${MAX_NO_OUTPUT_TIMEOUT}ms.`);
+    };
+    const printMessage = msg => {
+      clearTimeout(noOutputTimeoutId);
+      noOutputTimeoutId = setTimeout(failDueToNoOutput, MAX_NO_OUTPUT_TIMEOUT);
+      return printMessageFn(msg);
+    };
+    const resolve = val => {
+      clearTimeout(noOutputTimeoutId);
+      resolveFn(val);
+    };
+    const reject = err => {
+      clearTimeout(noOutputTimeoutId);
+      rejectFn(err);
+    };
+
     let descr = command + ' ' + args.join(' ');
-    let processOutput = '';
     printMessage(`running: ${descr}\n`);
     try {
       proc = spawn(command, args, options);
     } catch (e) {
       console.log(e);
-      reject(e);
-      return {proc: null, promise};
+      return reject(e);
     }
     proc.stdout.on('data', printMessage);
     proc.stderr.on('data', printMessage);

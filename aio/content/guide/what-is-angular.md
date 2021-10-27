@@ -82,7 +82,7 @@ The preceding example calls a method, which is defined in the component class:
 
 <code-example path="what-is-angular/src/app/hello-world-bindings/hello-world-bindings.component.ts" region="method"></code-example>
 
-The following is an example of interpolation and bindings within an Angular template:
+The following is a combined example of Interpolation, Property Binding and Event Binding within an Angular template:
 
 <code-tabs linenums="true">
   <code-pane
@@ -204,8 +204,8 @@ These libraries are only required if and when they can help you add functionalit
 
 This topic is intended to give you a brief overview of what Angular is, the advantages it provides, and what to expect as you start to build your applications.
 
-To see Angular in action, see our [Getting Started](https://angular.io/start) tutorial. This tutorial uses [stackblitz.com](https://stackblitz.com/), for you to explore a working example of Angular without any installation requirements.
+To see Angular in action, see our [Getting Started](start) tutorial. This tutorial uses [stackblitz.com](https://stackblitz.com/), for you to explore a working example of Angular without any installation requirements.
 
 To explore Angular's capabilities further, we recommend reading through the sections, Understanding Angular and Developer Guides.
 
-@reviewed 2021-03-08
+@reviewed 2021-09-14

@@ -21,6 +21,7 @@ import { ScrollService } from 'app/shared/scroll.service';
 import { SearchResultsComponent } from 'app/shared/search-results/search-results.component';
 import { SelectComponent } from 'app/shared/select/select.component';
 import { TocItem, TocService } from 'app/shared/toc.service';
+import { SwUpdatesService } from 'app/sw-updates/sw-updates.service';
 import { of, Subject, timer } from 'rxjs';
 import { first, mapTo } from 'rxjs/operators';
 import { MockLocationService } from 'testing/location.service';
@@ -431,8 +432,14 @@ describe('AppComponent', () => {
         await setupSelectorForTesting();
         locationService.urlSubject.next('docs#section-1');
         const versionWithoutSlashIndex = component.docVersions.length;
-        const versionWithoutSlashUrl = component.docVersions[versionWithoutSlashIndex] = { url: 'https://next.angular.io', title: 'foo' };
-        selectElement.triggerEventHandler('change', { option: versionWithoutSlashUrl, index: versionWithoutSlashIndex });
+        const versionWithoutSlashUrl = (component.docVersions[versionWithoutSlashIndex] = {
+          url: 'https://next.angular.io',
+          title: 'foo',
+        });
+        selectElement.triggerEventHandler('change', {
+          option: versionWithoutSlashUrl,
+          index: versionWithoutSlashIndex,
+        });
         expect(locationService.go).toHaveBeenCalledWith('https://next.angular.io/docs#section-1');
       });
     });
@@ -589,7 +596,10 @@ describe('AppComponent', () => {
     });
 
     describe('restrainScrolling()', () => {
-      const preventedScrolling = (currentTarget: { scrollTop: number, scrollHeight?: number, clientHeight?: number }, deltaY: number) => {
+      const preventedScrolling = (
+        currentTarget: {scrollTop: number, scrollHeight?: number, clientHeight?: number},
+        deltaY: number
+      ) => {
         const evt = {
           deltaY,
           currentTarget,
@@ -780,15 +790,20 @@ describe('AppComponent', () => {
 
       describe('keyup handling', () => {
         it('should grab focus when the / key is pressed', () => {
-          const searchBox: SearchBoxComponent = fixture.debugElement.query(By.directive(SearchBoxComponent)).componentInstance;
+          const searchBox: SearchBoxComponent = fixture.debugElement.query(
+            By.directive(SearchBoxComponent)
+          ).componentInstance;
           spyOn(searchBox, 'focus');
           window.document.dispatchEvent(new KeyboardEvent('keyup', { key: '/' }));
           fixture.detectChanges();
           expect(searchBox.focus).toHaveBeenCalled();
         });
 
+        // eslint-disable-next-line max-len
         it('should set focus back to the search box when the search results are displayed and the escape key is pressed', () => {
-          const searchBox: SearchBoxComponent = fixture.debugElement.query(By.directive(SearchBoxComponent)).componentInstance;
+          const searchBox: SearchBoxComponent = fixture.debugElement.query(
+            By.directive(SearchBoxComponent)
+          ).componentInstance;
           spyOn(searchBox, 'focus');
           component.showSearchResults = true;
           window.document.dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape' }));
@@ -809,7 +824,15 @@ describe('AppComponent', () => {
           const searchService = TestBed.inject(SearchService) as Partial<SearchService> as MockSearchService;
 
           const results = [
-            { path: 'news', title: 'News', type: 'marketing', keywords: '', titleWords: '', deprecated: false, topics: '' }
+            {
+              path: 'news',
+              title: 'News',
+              type: 'marketing',
+              keywords: '',
+              titleWords: '',
+              deprecated: false,
+              topics: '',
+            },
           ];
 
           searchService.searchResults.next({ query: 'something', results });
@@ -829,6 +852,19 @@ describe('AppComponent', () => {
           expect(doSearchSpy).toHaveBeenCalledWith('some query');
         });
       });
+    });
+
+    describe('SW updates', () => {
+      it('should be enabled when the component is initialized',
+        inject([SwUpdatesService], (swUpdates: TestSwUpdatesService) => {
+          swUpdates.disable();
+          expect(swUpdates.isEnabled).toBeFalse();
+
+          const fixture2 = TestBed.createComponent(AppComponent);
+          fixture2.detectChanges();
+          expect(swUpdates.isEnabled).toBeTrue();
+        })
+      );
     });
 
     describe('archive redirection', () => {
@@ -967,7 +1003,7 @@ describe('AppComponent', () => {
         jasmine.clock().tick(1);  // triggers the HTTP response for the document
         const toolbar = fixture.debugElement.query(By.css('.app-toolbar'));
 
-        // Initially, `isTransitoning` is true.
+        // Initially, `isTransitioning` is true.
         expect(component.isTransitioning).toBe(true);
         expect(toolbar.classes.transitioning).toBe(true);
 
@@ -976,7 +1012,7 @@ describe('AppComponent', () => {
         expect(component.isTransitioning).toBe(false);
         expect(toolbar.classes.transitioning).toBeFalsy();
 
-        // While a document is being rendered, `isTransitoning` is set to true.
+        // While a document is being rendered, `isTransitioning` is set to true.
         triggerDocViewerEvent('docReady');
         fixture.detectChanges();
         expect(component.isTransitioning).toBe(true);
@@ -1269,6 +1305,7 @@ function createTestingModule(initialUrl: string, mode: string = 'stable') {
       { provide: LocationService, useFactory: () => mockLocationService },
       { provide: Logger, useClass: MockLogger },
       { provide: SearchService, useClass: MockSearchService },
+      { provide: SwUpdatesService, useClass: TestSwUpdatesService },
       { provide: Deployment, useFactory: () => {
         const deployment = new Deployment(mockLocationService as any);
         deployment.mode = mode;
@@ -1367,4 +1404,13 @@ class TestHttpClient {
     // Preserve async nature of `HttpClient`.
     return timer(1).pipe(mapTo(data));
   }
+}
+
+type PublicPart<T> = {[K in keyof T]: T[K]};
+class TestSwUpdatesService implements PublicPart<SwUpdatesService> {
+  isEnabled = false;
+
+  disable() { this.isEnabled = false; }
+  enable() { this.isEnabled = true; }
+  ngOnDestroy() { this.disable(); }
 }

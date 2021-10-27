@@ -190,7 +190,6 @@ groups:
         - JiaLiPassion # Jia Li
         - JoostK # Joost Koehoorn
         - josephperrott # Joey Perrott
-        - kyliau # Keen Yee Liau
         - manughub # Manu Murthy
         - mgechev # Minko Gechev
         - mmalerba # Miles Malerba
@@ -238,6 +237,7 @@ groups:
         contains_any_globs(files.exclude('packages/compiler-cli/ngcc/**'), [
           'packages/compiler/**',
           'packages/examples/compiler/**',
+          'aio/content/examples/angular-compiler-options/**',
           'packages/compiler-cli/**',
           'aio/content/guide/angular-compiler-options.md',
           'aio/content/guide/aot-compiler.md',
@@ -246,8 +246,9 @@ groups:
           ])
     reviewers:
       users:
-        - alxhub
         - AndrewKushnir
+        - alxhub
+        - atscott
         - JoostK
 
   # =========================================================
@@ -542,7 +543,20 @@ groups:
           'packages/compiler/src/render3/view/i18n/**',
           'packages/compiler-cli/src/extract_i18n.ts',
           'packages/localize/**',
-          'aio/content/guide/i18n.md',
+          'aio/content/guide/i18n-overview.md',
+          'aio/content/guide/i18n-common-overview.md',
+          'aio/content/guide/i18n-common-add-package.md',
+          'aio/content/guide/i18n-common-locale-id.md',
+          'aio/content/guide/i18n-common-format-data-locale.md',
+          'aio/content/guide/i18n-common-prepare.md',
+          'aio/content/guide/i18n-common-translation-files.md',
+          'aio/content/guide/i18n-common-merge.md',
+          'aio/content/guide/i18n-common-deploy.md',
+          'aio/content/guide/i18n-example.md',
+          'aio/content/guide/i18n-optional-overview.md',
+          'aio/content/guide/i18n-optional-manual-runtime-locale.md',
+          'aio/content/guide/i18n-optional-import-global-variants.md',
+          'aio/content/guide/i18n-optional-manage-marked-text.md',
           'aio/content/examples/i18n/**'
           ])
     reviewers:
@@ -569,7 +583,6 @@ groups:
       users:
         - alan-agius4
         - alxhub
-        - kyliau
 
   # =========================================================
   #  Framework: Router
@@ -732,9 +745,12 @@ groups:
           'packages/core/test/linker/security_integration_spec.ts',
           'packages/compiler/src/schema/**',
           'packages/platform-browser/src/security/**',
+          'packages/tsconfig-tsec-base.json',
+          'packages/tsec-exemption.json',
+          'tools/tsec.bzl',
           'aio/content/guide/security.md',
           'aio/content/examples/security/**',
-          'aio/content/images/guide/security/**'
+          'aio/content/images/guide/security/**',
           ])
     reviewers:
       users:
@@ -760,9 +776,9 @@ groups:
           ])
     reviewers:
       users:
+        - devversion
         - IgorMinar
         - josephperrott
-        - kyliau
 
   # =========================================================
   #  Language Service
@@ -780,7 +796,6 @@ groups:
           ])
     reviewers:
       users:
-        - kyliau
         - atscott
         - zarend
 
@@ -968,6 +983,7 @@ groups:
           'aio/content/guide/updating.md',
           'aio/content/guide/deprecations.md',
           'aio/content/guide/migration-legacy-message-id.md',
+          'aio/content/examples/deprecation-guide/**',
           'aio/content/guide/migration-renderer.md',
           'aio/content/guide/migration-undecorated-classes.md',
           'aio/content/guide/migration-dynamic-flag.md',
@@ -1014,13 +1030,14 @@ groups:
       - *can-be-global-docs-approved
       - >
         contains_any_globs(files, [
-          'packages/compiler-cli/src/tooling.ts'
+          'packages/compiler-cli/private/tooling.ts',
+          'packages/localize/tools/index.ts'
         ])
     reviewers:
       users:
         - alan-agius4
         - clydin
-        - kyliau
+        - dgp1130
         - IgorMinar
     reviews:
       request: -1 # request reviews from everyone
@@ -1127,6 +1144,8 @@ groups:
           'aio/content/guide/docs-style-guide.md',
           'aio/content/examples/docs-style-guide/**',
           'aio/content/images/guide/docs-style-guide/**',
+          'aio/content/guide/localized-documentation.md',
+          'aio/content/guide/localizing-angular.md',
           'aio/content/guide/reviewing-content.md',
           'aio/content/guide/updating-content-github-ui.md',
           'aio/content/guide/updating-search-keywords.md',
@@ -1154,10 +1173,10 @@ groups:
           '.ng-dev/**',
           '.vscode/**',
           '.yarn/**',
-          'dev-infra/**',
           'docs/*.md',
           'docs/images/**',
           'goldens/*',
+          'goldens/public-api/manage.js',
           'modules/*',
           'packages/*',
           'packages/examples/test-utils/**',
@@ -1177,7 +1196,6 @@ groups:
           'tools/source-map-test/**',
           'tools/symbol-extractor/**',
           'tools/testing/**',
-          'tools/ts-api-guardian/**',
           'tools/tslint/**',
           'tools/utils/**',
           'tools/yarn/**',
@@ -1202,7 +1220,7 @@ groups:
       - *no-groups-above-this-rejected
       - *can-be-global-approved
       - >
-        contains_any_globs(files, [
+        contains_any_globs(files.exclude("goldens/public-api/manage.js"), [
           'goldens/public-api/**',
           'docs/NAMING.md',
           'aio/content/errors/*.md',

@@ -5,7 +5,7 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import {absoluteFrom, getSourceFileOrError} from '../../file_system';
 import {runInEachFileSystem} from '../../file_system/testing';
@@ -760,7 +760,7 @@ runInEachFileSystem(() => {
               export declare function __assign(t: any, ...sources: any[]): any;
               export declare function __spread(...args: any[][]): any[];
               export declare function __spreadArrays(...args: any[][]): any[];
-              export declare function __spreadArray(to: any[], from: any[]): any[];
+              export declare function __spreadArray(to: any[], from: any[], pack?: boolean): any[];
               export declare function __read(o: any, n?: number): any[];
             `,
           },
@@ -870,6 +870,18 @@ runInEachFileSystem(() => {
               const b = [5, 6];
             `,
             'tslib.__spreadArray(a, b)');
+
+        expect(arr).toEqual([4, 5, 6]);
+      });
+
+      it('should evaluate `__spreadArray()` with three arguments', () => {
+        const arr: number[] = evaluateExpression(
+            `
+              import {__spreadArray} from 'tslib';
+              const a = [4];
+              const b = [5, 6];
+            `,
+            '__spreadArray(a, b, false)');
 
         expect(arr).toEqual([4, 5, 6]);
       });

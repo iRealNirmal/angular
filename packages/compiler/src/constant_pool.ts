@@ -7,7 +7,6 @@
  */
 
 import * as o from './output/output_ast';
-import {error, OutputContext} from './util';
 
 const CONSTANT_PREFIX = '_c';
 
@@ -276,6 +275,13 @@ export class ConstantPool {
   }
 }
 
+export interface OutputContext {
+  genFilePath: string;
+  statements: o.Statement[];
+  constantPool: ConstantPool;
+  importExpr(reference: any, typeParams?: o.Type[]|null, useSummaries?: boolean): o.Expression;
+}
+
 /**
  * Visitor used to determine if 2 expressions are equivalent and can be shared in the
  * `ConstantPool`.
@@ -318,7 +324,6 @@ class KeyVisitor implements o.ExpressionVisitor {
   visitWriteVarExpr = invalid;
   visitWriteKeyExpr = invalid;
   visitWritePropExpr = invalid;
-  visitInvokeMethodExpr = invalid;
   visitInvokeFunctionExpr = invalid;
   visitTaggedTemplateExpr = invalid;
   visitInstantiateExpr = invalid;
